@@ -112,6 +112,8 @@ class LC3
       if msg =~ /^TOCODE/
         tocode_counter -= 1
       end
+
+      break if msg =~ /^ERR/
     end
 
     self
@@ -298,7 +300,7 @@ class LC3
 
     when 'CONT'
     when 'ERR'
-      $stderr.puts msg
+      @logger.error msg
     when 'REG'            # Register value
       # Register number
       reg = tokens.shift
