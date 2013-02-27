@@ -113,6 +113,10 @@ class LC3
         tocode_counter -= 1
       end
 
+      # ignore warning about no symbols
+      next if msg =~ /WARNING: No symbols/
+
+      # don't ignore other errors
       break if msg =~ /^ERR/
     end
 
