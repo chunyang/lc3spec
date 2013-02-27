@@ -1,3 +1,5 @@
+require 'pathname'
+
 module LC3Spec
   module Helpers
     def normalize_to_s(number)
@@ -32,6 +34,10 @@ module LC3Spec
       when Fixnum
         number
       end
+    end
+
+    def is_absolute_path?(path)
+      Pathname.new(path).absolute?
     end
   end
 end

@@ -2,14 +2,25 @@ require 'open3'
 
 require 'lc3spec/constants'
 require 'lc3spec/lc3'
+require 'lc3spec/helpers'
 require 'lc3spec/errors'
 
 module LC3Spec
   class Test
-    def initialize(description, options, &block)
-      @lc3 = LC3.new
+    include LC3Spec::Helpers
 
-      instance_eval(&block) if block_given?
+    def initialize(description, options, &block)
+      # Save src_dir
+      @src_dir = File.expand_path(Dir.pwd)
+
+      # Do everything inside tmp_dir
+      Dir.mktmpdir('spec') do |tmp_dir|
+        Dir.chdir(tmp_dir) do
+          @lc3 = LC3.new
+
+          instance_eval(&block) if block_given?
+        end
+      end
     end
 
     def file_from_asm(asm)
@@ -19,6 +30,7 @@ module LC3Spec
     end
 
     def file(filename)
+      ensure_present(filename)
       ensure_assembled(filename)
       @lc3.file(filename)
 
@@ -83,10 +95,36 @@ module LC3Spec
       end
     end
 
+    def ensure_present(filename)
+      if filename.nil? or filename.empty?
+        raise DoesNotAssembleError, 'Filename nil or empty'
+      end
+
+      # Copy file to current directory if needed
+      basename = File.basename filename
+
+      if Dir.glob(basename + '*').empty?
+        if is_absolute_path?(filename)
+          Dir.glob(filename + '') do |fn|
+            FileUtils.cp(fn, '.')
+          end
+        else
+          Dir.glob(File.join(@src_dir, filename + '*')) do |fn|
+            FileUtils.cp(fn, '.')
+          end
+        end
+      end
+
+      # Check if we have the file now
+      if Dir.glob(basename + '*').empty?
+        raise DoesNotAssembleError, "Cannot find file #{basename}"
+      end
+    end
+
     def ensure_assembled(filename)
       if filename !~ /\.asm$/ and filename !~ /\.obj/
-        asm_file = File.join(filename, '.asm')
-        obj_file = File.join(filename, '.obj')
+        asm_file = filename + '.asm'
+        obj_file = filename + '.obj'
 
         # Always prefer finding .asm over .obj file
         if File.exist? asm_file
