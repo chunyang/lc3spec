@@ -37,6 +37,8 @@ module LC3Spec
       self
     end
 
+    alias_method :load_file, :file
+
     def set_label(label, addr)
       label = label.to_s.upcase
 
