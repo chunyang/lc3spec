@@ -63,8 +63,40 @@ class LC3
     self
   end
 
+  def get_memory(addr)
+    if addr.respond_to?(:upcase)
+      label_addr = get_address(addr)
+      addr = label_addr unless label_addr.nil?
+    end
+
+    @memory[normalize_to_i(addr)]
+  end
+
+  def set_memory(addr, val)
+    # addr may be memory address or label
+
+    if addr.respond_to?(:upcase) and @labels.include?(addr.upcase.to_s)
+      # Is a label
+      addr = addr.upcase.to_s
+    else
+      # Not a label
+      addr = normalize_to_s(addr)
+    end
+
+    @io.puts("memory #{addr} #{normalize_to_s(val)}")
+
+    loop do
+      msg = @io.readline
+      parse_msg msg.strip
+
+      break if msg =~ /^ERR|CODE/
+    end
+
+    self
+  end
+
   def get_address(label)
-    @labels[label.to_s.upcase.to_s]
+    @labels[label.upcase.to_s]
   end
 
   def file(filename)
