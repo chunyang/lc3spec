@@ -23,6 +23,23 @@ module LC3Spec
       end
     end
 
+    def set_register(reg, val = 0)
+      case reg
+      when Hash
+        reg.each do |r, v|
+          @lc3.set_register(r, v)
+        end
+      when Array
+        reg.each_with_index do |v, i|
+          @lc3.set_register("R#{i}", v)
+        end
+      else
+        @lc3.set_register(reg, val)
+      end
+    end
+
+    alias_method :set_registers, :set_register
+
     def file_from_asm(asm)
       assemble_and_load { |f| f.puts asm }
 
