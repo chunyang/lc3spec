@@ -152,7 +152,7 @@ module LC3Spec
 
       if Dir.glob(basename + '*').empty?
         if is_absolute_path?(filename)
-          Dir.glob(filename + '') do |fn|
+          Dir.glob(filename + '*') do |fn|
             FileUtils.cp(fn, '.')
           end
         else
