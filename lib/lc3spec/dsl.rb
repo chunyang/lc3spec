@@ -2,7 +2,8 @@ module LC3Spec
   module Dsl
     def set(option, value = true)
       @options ||= {
-        :output => $stdout
+        :output => $stdout,
+        :keep_score => false
       }
 
       if option == :output
@@ -42,15 +43,65 @@ module LC3Spec
       output = @options[:output]
 
       if t.pass
-        output.puts "#{description} [OK]"
+        pass(description, points)
       else
-        output.puts "#{description} [FAIL]"
+        fail(description, points)
 
         # FIXME: Ugly
         errors = t.reporter.errors.join("\n")
 
         output.puts errors.each_line.map { |line| '  ' + line }.join('')
         output.puts
+      end
+    end
+
+    def pass(description, points)
+      count_points(:pass, points)
+
+      if !@options[:keep_score] || (points == 0)
+        @options[:output].puts "#{description} [OK]"
+      else
+        @options[:output].puts "#{description} #{points}/#{points}"
+      end
+    end
+
+    def fail(description, points)
+      count_points(:fail, points)
+
+      if !@options[:keep_score] || (points == 0)
+        @options[:output].puts "#{description} [FAIL]"
+      else
+        @options[:output].puts "#{description} 0/#{points}"
+      end
+    end
+
+    def count_points(result, possible)
+      @possible_points ||= 0
+      @earned_points ||= 0
+
+      @earned_points += result == :pass ? possible : 0
+      @possible_points += possible
+
+      @num_tests ||= 0
+      @num_tests += 1
+
+      @num_passed ||= 0
+      @num_passed += result == :pass ? 1 : 0
+    end
+
+    def print_score
+      return if @num_tests.nil? or (@num_tests == 0)
+
+      output = @options[:output]
+
+      if @options[:keep_score]
+        output.puts "Score: #@earned_points/#@possible_points"
+      else
+        if @num_passed == @num_tests
+          output.puts "[ALL OK]"
+        elsif @num_passed == 0
+          output.puts "[ALL FAIL]"
+        end
       end
     end
   end

@@ -200,8 +200,6 @@ class LC3
       out << @output.readpartial(1024)
     end
 
-    p out
-
     out.gsub("\n\n--- halting the LC-3 ---\n\n", '')
   end
 
