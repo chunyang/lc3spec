@@ -17,8 +17,11 @@ class LC3
   def initialize
     # Logging
     @logger = Logger.new(STDERR)
-    @logger.level = Logger::ERROR
-    #@logger.level = Logger::DEBUG
+    if ENV['LC3DEBUG']
+      @logger.level = Logger::DEBUG
+    else
+      @logger.level = Logger::ERROR
+    end
     @logger.formatter = proc do |severity, datetime, progname, msg|
       "#{severity}: #{msg}\n"
     end
