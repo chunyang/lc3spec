@@ -195,8 +195,12 @@ class LC3
 
     # There is no signal that tells the GUI that output is ready...
     # FIXME: This is a bug waiting to happen
+    retries = 10
     until @output.ready?
-      sleep(0.01)
+      sleep(0.1)
+
+      retries -= 1
+      break if retries <= 0
     end
 
     while @output.ready?
