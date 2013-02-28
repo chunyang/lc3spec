@@ -1,17 +1,23 @@
 require 'open3'
 
 require 'lc3spec/constants'
+require 'lc3spec/errors'
+require 'lc3spec/expectations'
 require 'lc3spec/lc3'
 require 'lc3spec/helpers'
-require 'lc3spec/errors'
+require 'lc3spec/reporter'
 
 module LC3Spec
   class Test
     include LC3Spec::Helpers
 
-    def initialize(description, options, &block)
+    attr_accessor :pass, :reporter
+
+    def initialize(options, &block)
       # Save src_dir
       @src_dir = File.expand_path(Dir.pwd)
+      @reporter = Reporter.new
+      @pass = true
 
       # Do everything inside tmp_dir
       Dir.mktmpdir('spec') do |tmp_dir|
@@ -19,6 +25,8 @@ module LC3Spec
           @lc3 = LC3.new
 
           instance_eval(&block) if block_given?
+
+          @pass = false if @reporter.fail?
         end
       end
     end
@@ -75,6 +83,10 @@ module LC3Spec
         @lc3.send(method_name, *arguments, &block)
 
         self
+      elsif method_name.to_s =~ /^expect_/
+        LC3Spec::Expectations.send(method_name, @lc3, @reporter, *arguments, &block)
+
+        self
       else
         super
       end
@@ -82,6 +94,8 @@ module LC3Spec
 
     def respond_to_missing?(method_name, include_private = false)
       if @lc3.respond_to? method_name
+        true
+      elsif method_name.to_s =~ /^expect_/
         true
       else
         super

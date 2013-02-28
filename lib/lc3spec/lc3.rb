@@ -17,7 +17,8 @@ class LC3
   def initialize
     # Logging
     @logger = Logger.new(STDERR)
-    @logger.level = Logger::DEBUG
+    @logger.level = Logger::ERROR
+    #@logger.level = Logger::DEBUG
     @logger.formatter = proc do |severity, datetime, progname, msg|
       "#{severity}: #{msg}\n"
     end
@@ -107,6 +108,7 @@ class LC3
 
     while tocode_counter > 0
       msg = @io.readline
+
       parse_msg msg.strip
 
       if msg =~ /^TOCODE/
@@ -188,9 +190,17 @@ class LC3
   def get_output
     out = ''
 
+    # There is no signal that tells the GUI that output is ready...
+    # FIXME: This is a bug waiting to happen
+    until @output.ready?
+      sleep(0.01)
+    end
+
     while @output.ready?
       out << @output.readpartial(1024)
     end
+
+    p out
 
     out.gsub("\n\n--- halting the LC-3 ---\n\n", '')
   end
@@ -199,11 +209,15 @@ class LC3
     # Start lc3sim instance
     @io = IO.popen(%w(lc3sim -gui), 'r+')
 
-    # Port for output server
-    @port = (rand * 1000 + 5000).to_i
+    begin
+      # Port for output server
+      @port = (rand * 1000 + 5000).to_i
 
-    # Start server to get output
-    @server = TCPServer.new @port
+      # Start server to get output
+      @server = TCPServer.new @port
+    rescue Errno::EADDRINUSE
+      retry
+    end
 
     th = Thread.new do
       @output = @server.accept
@@ -304,7 +318,11 @@ class LC3
 
     when 'CONT'
     when 'ERR'
-      @logger.error msg
+      if msg =~ /WARNING/
+        @logger.warn msg
+      else
+        @logger.error msg
+      end
     when 'REG'            # Register value
       # Register number
       reg = tokens.shift
@@ -329,7 +347,7 @@ class LC3
       addr = normalize_to_i(tokens.shift)
       val = tokens.shift
     else
-      $stderr.puts "Unexpected message: #{msg}"
+      @logger.debug "Unexpected message: #{msg}"
     end
   end
 
