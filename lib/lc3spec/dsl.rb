@@ -1,11 +1,21 @@
 module LC3Spec
   module Dsl
-    def set(option, value = true)
-      @options ||= {
-        :output => $stdout,
-        :keep_score => false
-      }
+    def self.extended(base)
+      base.instance_eval do
+        @options ||= {
+          :output => $stdout,
+          :keep_score => false
+        }
 
+        @possible_points ||= 0
+        @earned_points ||= 0
+
+        @num_tests ||= 0
+        @num_passed ||= 0
+      end
+    end
+
+    def set(option, value = true)
       if option == :output
         case value
         when File
@@ -76,21 +86,15 @@ module LC3Spec
     end
 
     def count_points(result, possible)
-      @possible_points ||= 0
-      @earned_points ||= 0
-
       @earned_points += result == :pass ? possible : 0
       @possible_points += possible
 
-      @num_tests ||= 0
       @num_tests += 1
-
-      @num_passed ||= 0
       @num_passed += result == :pass ? 1 : 0
     end
 
     def print_score
-      return if @num_tests.nil? or (@num_tests == 0)
+      return if @num_tests == 0
 
       output = @options[:output]
 
