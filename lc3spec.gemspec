@@ -2,7 +2,7 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.name        = 'lc3spec'
-  s.version     = '0.1.1'
+  s.version     = '0.1.2'
   s.date        = '2013-02-27'
   s.summary     = 'Testing and grading suite for LC-3 assembly programs'
   s.description = 'DSL for testing LC-3 assembly programs'
