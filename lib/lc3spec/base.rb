@@ -22,6 +22,8 @@ module LC3Spec
 
       # Do everything inside tmp_dir
       Dir.mktmpdir('spec') do |tmp_dir|
+        @tmp_dir = tmp_dir
+
         Dir.chdir(tmp_dir) do
           @lc3 = LC3.new
 
@@ -63,9 +65,9 @@ module LC3Spec
     end
 
     def file(filename)
-      ensure_present(filename)
-      ensure_assembled(filename)
-      @lc3.file(filename)
+      basename = ensure_present(filename)
+      ensure_assembled(basename)
+      @lc3.file(basename)
 
       self
     end
@@ -153,11 +155,11 @@ module LC3Spec
       if Dir.glob(basename + '*').empty?
         if is_absolute_path?(filename)
           Dir.glob(filename + '*') do |fn|
-            FileUtils.cp(fn, '.')
+            FileUtils.cp(fn, @tmp_dir)
           end
         else
           Dir.glob(File.join(@src_dir, filename + '*')) do |fn|
-            FileUtils.cp(fn, '.')
+            FileUtils.cp(fn, @tmp_dir)
           end
         end
       end
@@ -166,6 +168,8 @@ module LC3Spec
       if Dir.glob(basename + '*').empty?
         raise DoesNotAssembleError, "Cannot find file #{basename}"
       end
+
+      basename
     end
 
     def ensure_assembled(filename)
