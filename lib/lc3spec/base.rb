@@ -96,9 +96,13 @@ module LC3Spec
 
     def method_missing(method_name, *arguments, &block)
       if @lc3.respond_to? method_name
-        @lc3.send(method_name, *arguments, &block)
+        res = @lc3.send(method_name, *arguments, &block)
 
-        self
+        if method_name.to_s =~ /^get_/
+          res
+        else
+          self
+        end
       elsif method_name.to_s =~ /^expect_/
         LC3Spec::Expectations.send(method_name, @lc3, @reporter, *arguments, &block)
 
