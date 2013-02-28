@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.date        = '2013-02-27'
   s.summary     = 'Testing and grading suite for LC-3 assembly programs'
   s.description = 'DSL for testing LC-3 assembly programs'
+  s.required_ruby_version = '>= 1.9.3'
   s.authors     = ['Chun Yang']
   s.email       = 'x@cyang.info'
   s.files       = FileList['lib/**/*.rb',
