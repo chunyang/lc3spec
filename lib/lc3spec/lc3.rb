@@ -41,11 +41,12 @@ class LC3
   end
 
   def get_register(reg)
+    reg = reg.to_s.upcase.to_sym  # Ruby 1.8 doesn't support Symbol#upcase
     @registers[reg]
   end
 
   def set_register(reg, val)
-    reg = reg.upcase # Don't use ! version because it doesn't work for symbols
+    reg = reg.to_s.upcase # Don't use ! version because it doesn't work for symbols
 
     unless @registers.keys.include? reg.to_sym
       raise "Invalid register: #{reg.to_s}"
