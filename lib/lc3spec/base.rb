@@ -1,4 +1,5 @@
 require 'open3'
+require 'timeout'
 
 require 'lc3spec/constants'
 require 'lc3spec/errors'
@@ -24,7 +25,14 @@ module LC3Spec
         Dir.chdir(tmp_dir) do
           @lc3 = LC3.new
 
-          instance_eval(&block) if block_given?
+          begin
+            instance_eval(&block) if block_given?
+          rescue Timeout::Error => err
+            @reporter.report "Execution timed-out, likely due to an infinite loop"
+          rescue LC3Spec::DoesNotAssembleError => err
+            @reporter.report err.message
+            $stderr.puts err.message
+          end
 
           @pass = false if @reporter.fail?
         end
@@ -60,6 +68,12 @@ module LC3Spec
       @lc3.file(filename)
 
       self
+    end
+
+    def continue(duration = 1.5)
+      Timeout.timeout(duration) do
+        @lc3.continue
+      end
     end
 
     alias_method :load_file, :file
