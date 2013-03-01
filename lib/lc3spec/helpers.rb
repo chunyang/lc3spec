@@ -8,10 +8,12 @@ module LC3Spec
         if number =~ /^(?:x|0x|X|0X)?([0-9A-Fa-f]{1,4})$/
           "x#{$1.rjust(4, '0').upcase}"
         else
-          raise "Unable to normalize number: #{number}"
+          raise ArgumentError, "Unable to normalize number: #{number}"
         end
       when Fixnum
         "x#{([number].pack('s>*')).unpack('H*').first.upcase}"
+      else
+        raise ArgumentError, "Expecting String or Fixnum, got #{number.class}"
       end
     end
 
@@ -29,10 +31,12 @@ module LC3Spec
 
           [num_part].pack('H*').unpack('s>*').first
         else
-          raise "Unable to normalize number: #{number}"
+          raise ArgumentError, "Unable to normalize number: #{number}"
         end
       when Fixnum
         number
+      else
+        raise ArgumentError, "Expecting String or Fixnum, got #{number.class}"
       end
     end
 

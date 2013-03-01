@@ -40,20 +40,36 @@ class LC3
     initialize_lc3sim
   end
 
+  # Get the value of a register
+  #
+  # @param [Symbol] reg the register, one of :R0 through :R7,
+  #   :PC, :IR, :PSR, or :CC
+  # @return [String] the register value in hex format (e.g., 'x0000') or nil
+  #   if the register does not exist.
   def get_register(reg)
     reg = reg.to_s.upcase.to_sym  # Ruby 1.8 doesn't support Symbol#upcase
     @registers[reg]
   end
 
+  # Set the value of a register
+  #
+  # @param (see #get_register)
+  # @param [String] val the register value in hex format (e.g., 'xF1D0')
+  # @raise [ArgumentError] if the register is invalid or the value is nil,
+  # @return [self]
   def set_register(reg, val)
-    reg = reg.to_s.upcase # Don't use ! version because it doesn't work for symbols
+    reg = reg.upcase
 
     unless @registers.keys.include? reg.to_sym
-      raise "Invalid register: #{reg.to_s}"
+      raise ArgumentError, "Invalid register: #{reg.to_s}"
     end
 
     if val.nil?
-      raise "Invalid register value for #{reg.to_s}: #{val}"
+      raise ArgumentError, "Invalid register value for #{reg.to_s}: #{val}"
+    end
+
+    if reg.to_sym == :CC and not ['POSITIVE', 'NEGATIVE', 'ZERO'].include? val
+      raise ArgumentError, "CC can only be set to NEGATIVE, ZERO, or POSITIVE"
     end
 
     @io.puts "register #{reg.to_s} #{normalize_to_s(val)}"
@@ -62,21 +78,37 @@ class LC3
       msg = @io.readline
       parse_msg msg.strip
 
-      break if msg =~ /^TOCODE/
+      break if msg =~ /^ERR|TOCODE/
     end
 
     self
   end
 
+  # Return value in memory at the given address or label
+  #
+  # @param [String] addr an address in hex format (e.g., 'xADD4') or a label
+  # @raise [ArgumentError] if the argument is not a existing label or is an
+  #   invalid address
+  # @return [String] the value in memory in hex format
   def get_memory(addr)
     if addr.respond_to?(:upcase)
-      label_addr = get_address(addr)
-      addr = label_addr unless label_addr.nil?
+      label_addr = get_address(addr.upcase)
+
+      return @memory[label_addr] unless label_addr.nil?
     end
 
-    @memory[normalize_to_i(addr)]
+    @memory[normalize_to_s(addr)]
   end
 
+  # Set memory at the given address or label
+  #
+  # If val is a label, mem[addr] will be set to the address of val
+  #
+  # @param [String] addr an address or a label
+  # @param [String] val a value or a label
+  # @raise [ArgumentError] if addr is not an existing label, addr is an
+  #   invalid address, val is not an existing label, or val is invalid
+  # @return [self]
   def set_memory(addr, val)
     # addr may be memory address or label
 
@@ -88,7 +120,15 @@ class LC3
       addr = normalize_to_s(addr)
     end
 
-    @io.puts("memory #{addr} #{normalize_to_s(val)}")
+    # Value can be a label too
+    if val.respond_to?(:upcase) and @labels.include?(val.upcase.to_s)
+      # Is a label
+    else
+      # Is a value
+      val = normalize_to_s(val)
+    end
+
+    @io.puts("memory #{addr} #{val}")
 
     loop do
       msg = @io.readline
@@ -100,6 +140,11 @@ class LC3
     self
   end
 
+  # Get the address of a label
+  #
+  # @param [String] label
+  # @return [String] the address of the label, or nil if the label does
+  #   not exist
   def get_address(label)
     @labels[label.upcase.to_s]
   end
@@ -256,8 +301,7 @@ class LC3
 
     memory_header = "%18s ADDR  VALUE" % "label"
     memory = @memory.map do |addr, value|
-      "%18s %s %s" % [(addr_to_label[addr] or ''),
-                      normalize_to_s(addr), value]
+      "%18s %s %s" % [(addr_to_label[addr] or ''), addr, value]
     end.join("\n")
 
     #[memory_header, memory, registers].join("\n")
@@ -296,23 +340,21 @@ class LC3
     when 'BCLEAR'
     when 'BREAK'
     when 'CODE', 'CODEP'  # Line of code
-      # Address
-      addr = tokens.shift.to_i - 1
+      # Numeric address
+      num_addr = tokens.shift.to_i - 1
 
       # Note: if there is a breakpoint at the current address, the last
-      # token.shift produces a string like "12289B". Luckily, #to_i just
-      # ignores the B at the end.
+      # token.shift produces a string like "12289B". Luckily, to_i just
+      # reads whatever it can and discards the rest.
 
       # Label, if present
-      if tokens.first != "x%04X" % addr
-        label = tokens.shift.upcase
+      label = tokens.first != "x%04X" % num_addr ? tokens.shift.upcase : nil
 
-        # Don't overwrite label if one already exists
-        @labels[label] ||= addr
-      end
+      # hex address
+      addr = tokens.shift
 
-      # Discard hex address
-      tokens.shift
+      # Insert label, but don't overwrite if it already exists
+      @labels[label] ||= addr if not label.nil?
 
       # Value
       val = tokens.shift
