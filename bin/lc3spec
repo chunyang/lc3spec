@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'lc3spec'
+
+if ARGV.empty?
+  puts "Usage: lc3spec <spec-file>"
+  exit false
+end
+
+ARGV.each do |arg|
+  if not File.readable? arg
+    raise ArgumentError, "Cannot open #{arg} for reading."
+  end
+end
+
+ARGV.each do |arg|
+  load arg
+end
