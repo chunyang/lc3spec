@@ -28,10 +28,6 @@ set registers R0, R1, R2, R3, and R4 to 0, 1, 2, 3, and 4, respectively:
 We can write a spec, spec.rb, to test it:
 
 ```ruby
-#!/usr/bin/env ruby
-
-require 'lc3spec'
-
 test 'Register Expectations' do
   file 'regs'
   set_breakpoint 'TRAP_HALT'
@@ -45,7 +41,7 @@ test 'Register Expectations' do
 end
 ```
 
-Running with `ruby spec.rb`:
+Running with `lc3spec spec.rb`:
 
 ```
 Register Expectations [FAIL]
@@ -85,10 +81,6 @@ There are currently two supported options:
 An example:
 
 ```ruby
-#!/usr/bin/env ruby
-
-require 'lc3spec'
-
 configure do
   set :output, 'feedback.txt'
   set :keep_score, true
