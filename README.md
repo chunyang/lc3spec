@@ -129,6 +129,7 @@ gem install lc3spec
 
 * Documentation
 * Tests
+* Better expectations, e.g., for arrays or strings in memory
 
 # Bugs
 
