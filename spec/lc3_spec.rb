@@ -151,7 +151,7 @@ describe LC3 do
 
   describe '#step' do
     it 'executes one instruction' do
-      @lc3.set_register :PC, 'xA000'
+      @lc3.set_register(:PC, 'xA000')
       @lc3.get_register(:PC).should == 'xA000'
 
       @lc3.step
@@ -159,6 +159,28 @@ describe LC3 do
 
       @lc3.step
       @lc3.get_register(:PC).should == 'xA002'
+    end
+  end
+
+  describe '#continue' do
+    it 'executes instructions until halt' do
+      16.times { |i| @lc3.set_memory('x600%x' % i, 'x0000') }
+      @lc3.set_memory('x6010', 'xF025')
+      @lc3.set_register(:PC, 'x6000')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x0494'
+    end
+
+    it 'executes instructions until breakpoint' do
+      16.times { |i| @lc3.set_memory('x600%x' % i, 'x0000') }
+      @lc3.set_register(:PC, 'x6000')
+      @lc3.set_breakpoint('x600A')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x600A'
     end
   end
 end
