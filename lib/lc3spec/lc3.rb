@@ -196,6 +196,11 @@ class LC3
     self
   end
 
+  # Set a breakpoint at an address or label
+  #
+  # @param (see #get_memory)
+  # @raise (see #get_memory)
+  # @return [self]
   def set_breakpoint(addr)
     addr = addr.upcase.to_s if addr.respond_to? :upcase
     if @labels.include? addr

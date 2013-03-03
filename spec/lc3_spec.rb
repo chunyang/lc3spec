@@ -160,6 +160,10 @@ describe LC3 do
       @lc3.step
       @lc3.get_register(:PC).should == 'xA002'
     end
+
+    it 'returns self' do
+      @lc3.step.should == @lc3
+    end
   end
 
   describe '#continue' do
@@ -181,6 +185,35 @@ describe LC3 do
       @lc3.continue
 
       @lc3.get_register(:PC).should == 'x600A'
+    end
+
+    it 'returns self' do
+      @lc3.continue.should == @lc3
+    end
+  end
+
+  describe '#set_breakpoint' do
+    it 'sets a breakpoint' do
+      @lc3.set_memory('x6000', 'x0000')
+      @lc3.set_memory('x6001', 'x0000')
+      @lc3.set_memory('x6002', 'x0000')
+      @lc3.set_memory('x6003', 'x0000')
+      @lc3.set_register(:PC, 'x6000')
+      @lc3.set_breakpoint('x6003')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x6003'
+    end
+
+    it 'raises ArgumentError when given an invalid label or address' do
+      ['NONEXISTENT_LABEL', 'x20302', @lc3].each do |addr|
+        expect { @lc3.set_memory addr, 'xDEAD' }.to raise_error(ArgumentError)
+      end
+    end
+
+    it 'returns self' do
+      @lc3.set_breakpoint('xABCD').should == @lc3
     end
   end
 end
