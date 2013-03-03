@@ -174,6 +174,9 @@ class LC3
     self
   end
 
+  # Execute one instruction
+  #
+  # @return [self]
   def step
     @io.puts 'step'
 
@@ -182,6 +185,9 @@ class LC3
     self
   end
 
+  # Execute instructions until halt or breakpoint
+  #
+  # @return [self]
   def continue
     @io.puts 'continue'
 
