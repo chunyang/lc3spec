@@ -148,4 +148,17 @@ describe LC3 do
       end
     end
   end
+
+  describe '#step' do
+    it 'executes one instruction' do
+      @lc3.set_register :PC, 'xA000'
+      @lc3.get_register(:PC).should == 'xA000'
+
+      @lc3.step
+      @lc3.get_register(:PC).should == 'xA001'
+
+      @lc3.step
+      @lc3.get_register(:PC).should == 'xA002'
+    end
+  end
 end
