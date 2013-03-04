@@ -219,6 +219,11 @@ class LC3
     self
   end
 
+  # Clear a breakpoint at an address or label
+  #
+  # @param (see #set_breakpoint)
+  # @raise (see #set_breakpoint)
+  # @return [self]
   def clear_breakpoint(addr)
     if addr == :all
       @io.puts 'break clear all'

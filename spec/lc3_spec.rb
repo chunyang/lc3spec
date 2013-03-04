@@ -210,21 +210,67 @@ describe LC3 do
       @lc3.set_memory('x6000', 'xF025')
       @lc3.set_register(:PC, 'x6000')
       @lc3.set_breakpoint('TRAP_HALT')
-      expected = @lc3.get_address('TRAP_HALT')
 
       @lc3.continue
 
-      @lc3.get_register(:PC).should == expected
+      @lc3.get_register(:PC).should == @lc3.get_address('TRAP_HALT')
     end
 
     it 'raises ArgumentError when given an invalid label or address' do
       ['NONEXISTENT_LABEL', 'x20302', @lc3].each do |addr|
-        expect { @lc3.set_memory addr, 'xDEAD' }.to raise_error(ArgumentError)
+        expect { @lc3.set_breakpoint(addr) }.to raise_error(ArgumentError)
       end
     end
 
     it 'returns self' do
       @lc3.set_breakpoint('xABCD').should == @lc3
     end
+  end
+
+  describe '#clear_breakpoint' do
+    it 'clears a breakpoint given an address' do
+      6.times { |i| @lc3.set_memory('x600%x' % i, 'x0000') }
+      @lc3.set_breakpoint('x6001')
+      @lc3.set_breakpoint('x6003')
+      @lc3.set_breakpoint('x6005')
+      @lc3.set_register(:PC, 'x6000')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x6001'
+      @lc3.clear_breakpoint('x6003')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x6005'
+    end
+
+    it 'clears a breakpoint given a label' do
+      @lc3.file "#{File.dirname __FILE__}/resources/labels"
+      @lc3.set_breakpoint('LOOP')
+      @lc3.set_breakpoint('MIDDLE')
+      @lc3.set_breakpoint('DONE')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == @lc3.get_address('LOOP')
+      @lc3.clear_breakpoint('MIDDLE')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == @lc3.get_address('DONE')
+    end
+
+    it 'raises ArgumentError when given an invalid label or address' do
+      ['NONEXISTENT_LABEL', 'x20302', @lc3].each do |addr|
+        expect { @lc3.clear_breakpoint(addr) }.to raise_error(ArgumentError)
+      end
+    end
+
+    it 'returns self' do
+      @lc3.set_breakpoint('TRAP_HALT')
+      @lc3.clear_breakpoint('TRAP_HALT').should == @lc3
+    end
+
   end
 end

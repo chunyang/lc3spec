@@ -1,0 +1,10 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	BEGIN             B000
+//	LOOP              B002
+//	MIDDLE            B004
+//	LOOP2             B006
+//	DONE              B008
+
