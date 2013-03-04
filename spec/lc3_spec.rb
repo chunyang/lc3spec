@@ -271,6 +271,30 @@ describe LC3 do
       @lc3.set_breakpoint('TRAP_HALT')
       @lc3.clear_breakpoint('TRAP_HALT').should == @lc3
     end
+  end
 
+  describe '#clear_breakpoints' do
+    it 'clears all the breakpoints' do
+      6.times do |i|
+        addr = 'x600%x' % i
+        @lc3.set_memory(addr, 'x0000')
+        @lc3.set_breakpoint(addr)
+      end
+      @lc3.set_memory('x6006', 'xF025')
+      @lc3.set_register(:PC, 'x6000')
+
+      @lc3.continue
+
+      @lc3.set_register(:PC, 'x6001')
+      @lc3.clear_breakpoints
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == 'x0494'
+    end
+
+    it 'returns self' do
+      @lc3.clear_breakpoints.should == @lc3
+    end
   end
 end

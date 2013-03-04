@@ -248,6 +248,9 @@ class LC3
     self
   end
 
+  # Clear all breakpoints
+  #
+  # @return [self]
   def clear_breakpoints
     clear_breakpoint :all
   end
