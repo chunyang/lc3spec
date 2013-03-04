@@ -73,8 +73,8 @@ end
 
 There are currently two supported options:
 
-* :output - filename or file to write output to, default is $stdout
-* :keep_score - whether or not to display score for each test. If false,
+* `:output` - filename or file to write output to, default is `$stdout`
+* `:keep_score` - whether or not to display score for each test. If false,
   only `[OK]` or `[FAIL]` are displayed, if true, a fractional score
   is displayed, e.g., `0/1` or `4/4`
 
