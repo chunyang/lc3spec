@@ -193,7 +193,7 @@ describe LC3 do
   end
 
   describe '#set_breakpoint' do
-    it 'sets a breakpoint' do
+    it 'sets a breakpoint given an address' do
       @lc3.set_memory('x6000', 'x0000')
       @lc3.set_memory('x6001', 'x0000')
       @lc3.set_memory('x6002', 'x0000')
@@ -204,6 +204,17 @@ describe LC3 do
       @lc3.continue
 
       @lc3.get_register(:PC).should == 'x6003'
+    end
+
+    it 'sets a breakpoint given a label' do
+      @lc3.set_memory('x6000', 'xF025')
+      @lc3.set_register(:PC, 'x6000')
+      @lc3.set_breakpoint('TRAP_HALT')
+      expected = @lc3.get_address('TRAP_HALT')
+
+      @lc3.continue
+
+      @lc3.get_register(:PC).should == expected
     end
 
     it 'raises ArgumentError when given an invalid label or address' do
