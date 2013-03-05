@@ -274,16 +274,20 @@ class LC3
 
     # There is no signal that tells the GUI that output is ready...
     # FIXME: This is a bug waiting to happen
-    retries = 10
-    until @output.ready?
-      sleep(0.1)
+    catch(:done) do
+      loop do
+        retries = 5
+        until @output.ready?
+          sleep(0.1)
 
-      retries -= 1
-      break if retries <= 0
-    end
+          retries -= 1
+          throw :done if retries <= 0
+        end
 
-    while @output.ready?
-      out << @output.readpartial(1024)
+        while @output.ready?
+          out << @output.readpartial(1024)
+        end
+      end
     end
 
     out.gsub("\n\n--- halting the LC-3 ---\n\n", '')
