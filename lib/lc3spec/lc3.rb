@@ -308,6 +308,10 @@ class LC3
     @server.close
   end
 
+  # Return a string containing a human-readable representation of the current
+  #   state of the LC-3
+  #
+  # @return [String]
   def inspect
     registers = @registers.map { |k, v| "#{k}=#{v}" }.join(' ')
 
