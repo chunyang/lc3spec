@@ -275,6 +275,31 @@ class LC3
     out.gsub("\n\n--- halting the LC-3 ---\n\n", '')
   end
 
+  def close
+    @output.close
+    @server.close
+  end
+
+  def inspect
+    registers = @registers.map { |k, v| "#{k}=#{v}" }.join(' ')
+
+    addr_to_label = @labels.invert
+
+    memory_header = "%18s ADDR  VALUE" % "label"
+    memory = @memory.map do |addr, value|
+      "%18s %s %s" % [(addr_to_label[addr] or ''), addr, value]
+    end.join("\n")
+
+    #[memory_header, memory, registers].join("\n")
+    registers
+  end
+
+  # def to_s
+  #   @registers.map { |k, v| "#{k}=#{v}" }.join(' ')
+  # end
+
+  private
+
   def initialize_lc3sim
     # Start lc3sim instance
     @io = IO.popen(%w(lc3sim -gui), 'r+')
@@ -307,31 +332,6 @@ class LC3
       @output.readpartial 1024
     end
   end
-
-  def close
-    @output.close
-    @server.close
-  end
-
-  def inspect
-    registers = @registers.map { |k, v| "#{k}=#{v}" }.join(' ')
-
-    addr_to_label = @labels.invert
-
-    memory_header = "%18s ADDR  VALUE" % "label"
-    memory = @memory.map do |addr, value|
-      "%18s %s %s" % [(addr_to_label[addr] or ''), addr, value]
-    end.join("\n")
-
-    #[memory_header, memory, registers].join("\n")
-    registers
-  end
-
-  # def to_s
-  #   @registers.map { |k, v| "#{k}=#{v}" }.join(' ')
-  # end
-
-  private
 
   def parse_until_print_registers
     loop do
