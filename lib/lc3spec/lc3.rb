@@ -149,6 +149,12 @@ class LC3
     @labels[label.upcase.to_s]
   end
 
+  # Load a file given a path
+  #
+  # @param [String] filename the path of a file to load into lc3sim. The
+  #   argument should have .obj extension or no extension at all, in which
+  #   case .obj is assumed
+  # @return [self]
   def file(filename)
     @io.puts "file #{filename}"
 
