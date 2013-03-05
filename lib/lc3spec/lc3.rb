@@ -256,6 +256,16 @@ class LC3
   end
 
   # Return output from the LC-3
+  #
+  # The LC-3 welcome messages and halt messages are stripped from the output,
+  # so that it can easily compared to expected output.
+  #
+  # WARNING: This is potentially buggy as there is no signal from lc3sim when
+  # the output is ready, so this function just waits until output appears and
+  # reads what is available. This may not work if the output is very long.
+  #
+  # @return [String] the output from the LC-3, or an empty string
+  #   if there is no output
   def get_output
     out = ''
 
