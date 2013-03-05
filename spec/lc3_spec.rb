@@ -297,4 +297,46 @@ describe LC3 do
       @lc3.clear_breakpoints.should == @lc3
     end
   end
+
+  describe '#get_output' do
+    it 'returns empty string if there is no output', :slow => true do
+      @lc3.get_output.should == ''
+    end
+
+    it 'returns the output' do
+      @lc3.file "#{File.dirname __FILE__}/resources/short_output"
+      @lc3.continue
+      @lc3.get_output.should == 'Hello, world!'
+    end
+
+    it 'returns the output with spaces and newlines' do
+      @lc3.file "#{File.dirname __FILE__}/resources/spaces_output"
+      @lc3.continue
+      @lc3.get_output.should == " abc\n\nd \n \ne\n"
+    end
+
+    it 'returns the output across a breakpoint' do
+      @lc3.file "#{File.dirname __FILE__}/resources/break_output"
+      @lc3.continue
+      @lc3.get_output.should == "Hello, world!\n"
+    end
+
+    it 'flushes the output after being called', :slow => true do
+      @lc3.file "#{File.dirname __FILE__}/resources/short_output"
+      @lc3.continue
+      @lc3.get_output.should == 'Hello, world!'
+      @lc3.get_output.should == ''
+    end
+
+    it 'returns a long output' do
+      filename = File.join(File.dirname(__FILE__), 'resources/long_output')
+      expected = open(filename + '.asm', 'r') do |f|
+        f.read.split('"')[1]
+      end
+
+      @lc3.file filename
+      @lc3.continue
+      @lc3.get_output.should == expected
+    end
+  end
 end

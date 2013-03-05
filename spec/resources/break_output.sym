@@ -1,0 +1,8 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	BREAK             3002
+//	HELLO             3005
+//	WORLD             300D
+

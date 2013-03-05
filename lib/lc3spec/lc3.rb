@@ -255,8 +255,12 @@ class LC3
     clear_breakpoint :all
   end
 
+  # Return output from the LC-3
   def get_output
     out = ''
+
+    # Do something to wait for output to be ready
+    set_register(:PSR, @registers[:PSR])
 
     # There is no signal that tells the GUI that output is ready...
     # FIXME: This is a bug waiting to happen
