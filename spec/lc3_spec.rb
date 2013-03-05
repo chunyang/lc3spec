@@ -149,6 +149,24 @@ describe LC3 do
     end
   end
 
+  describe '#file' do
+    it 'loads a file' do
+      filename = File.join(File.dirname(__FILE__), 'resources/short_output')
+      @lc3.file(filename)
+
+      @lc3.get_memory('x3000').should == 'xE002'
+      @lc3.get_memory('x3001').should == 'xF022'
+      @lc3.get_memory('x3002').should == 'xF025'
+      @lc3.get_address('STRING').should == 'x3003'
+      @lc3.get_memory('x3003').should == 'x0048'
+    end
+
+    it 'returns self' do
+      filename = File.join(File.dirname(__FILE__), 'resources/labels')
+      @lc3.file(filename).should == @lc3
+    end
+  end
+
   describe '#step' do
     it 'executes one instruction' do
       @lc3.set_register(:PC, 'xA000')
