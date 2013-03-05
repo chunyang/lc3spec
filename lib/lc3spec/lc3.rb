@@ -297,6 +297,7 @@ class LC3
   #
   # @return [nil]
   def close
+    @io.close
     @output.close
     @server.close
   end

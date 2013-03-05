@@ -339,4 +339,13 @@ describe LC3 do
       @lc3.get_output.should == expected
     end
   end
+
+  describe '#close' do
+    it 'closes file descriptors' do
+      @lc3.close
+      @lc3.instance_variable_get(:@io).should be_closed
+      @lc3.instance_variable_get(:@output).should be_closed
+      @lc3.instance_variable_get(:@server).should be_closed
+    end
+  end
 end
