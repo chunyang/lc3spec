@@ -44,8 +44,8 @@ class LC3
   #
   # @param [Symbol] reg the register, one of :R0 through :R7,
   #   :PC, :IR, :PSR, or :CC
-  # @return [String] the register value in hex format (e.g., 'x0000') or nil
-  #   if the register does not exist.
+  # @return [String, nil] the register value in hex format (e.g., 'x0000') or
+  #   nil if the register does not exist.
   def get_register(reg)
     reg = reg.to_s.upcase.to_sym  # Ruby 1.8 doesn't support Symbol#upcase
     @registers[reg]
@@ -143,7 +143,7 @@ class LC3
   # Get the address of a label
   #
   # @param [String] label
-  # @return [String] the address of the label, or nil if the label does
+  # @return [String, nil] the address of the label, or nil if the label does
   #   not exist
   def get_address(label)
     @labels[label.upcase.to_s]
@@ -289,6 +289,9 @@ class LC3
     out.gsub("\n\n--- halting the LC-3 ---\n\n", '')
   end
 
+  # Close open file descriptors for communicating with lc3sim
+  #
+  # @return [nil]
   def close
     @output.close
     @server.close
