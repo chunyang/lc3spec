@@ -32,6 +32,28 @@ module LC3Spec
       end
     end
 
+    # Expect that an object file is not empty
+    #
+    # This is useful in determining whether or not a student submitted
+    # anything and to fail a test case if nothing is submitted.
+    #
+    # Note: Currently, this must only be called after the file is loaded
+    # because otherwise, the source file might not have been assembled yet!
+    #
+    # @param [LC3]
+    # @param [Reporter]
+    # @param [String] filename the path of the object file
+    def self.expect_nonempty(lc3, reporter, filename)
+      if filename !~ /\.obj/
+        filename = filename + '.obj'
+      end
+
+      # size == 2 means file only has .ORIG and .END
+      unless File.size(filename) > 2
+        reporter.report "File #{filename} has no code"
+      end
+    end
+
     def self.diff(expected, actual)
       "expected: #{expected}, actual: #{actual}"
     end
